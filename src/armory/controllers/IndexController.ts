@@ -43,16 +43,17 @@ export class IndexController {
 		ssp.extraDataColumns = ["`characters`.`gender`"];
 
 		if (this.armory.config.hideGameMasters) {
+			const account = this.armory.repositories.account;
 			ssp.joins.push({
 				table1: "characters",
 				column1: "account",
-				table2: "account_access",
+				table2: account.gmTableName,
 				column2: "id",
 				database2: realm.authDatabase,
 				kind: "LEFT",
-				where: `AND \`account_access\`.\`RealmID\` IN (-1, ${realm.realmId}) AND \`account_access\`.\`gmlevel\` > 0`,
+				where: account.gmJoinExtraCondition(realm),
 			});
-			ssp = ssp.where("`account_access`.`id` IS NULL");
+			ssp = ssp.where(`\`${account.gmTableName}\`.\`id\` IS NULL`);
 		}
 
 		const result = await ssp.where("`deleteInfos_Account` IS NULL").run(this.armory.config.dbQueryTimeout);

@@ -8,6 +8,7 @@ import { Pool, createPool } from "mysql2/promise";
 import { engine as handlebarsEngine } from "express-handlebars";
 
 import { Config, IRealmConfig } from "./Config";
+import { createRepositories, IRepositories } from "./repositories";
 import { DbcManager } from "./data/DbcReader";
 import { CharacterCustomization } from "./data/CharacterCustomization";
 import { IndexController } from "./controllers/IndexController";
@@ -19,6 +20,7 @@ export class Armory {
 	public characterCustomization: CharacterCustomization;
 	public dbc: DbcManager;
 	public config: Config;
+	public repositories: IRepositories;
 	public worldDb: Pool;
 	public logger: winston.Logger;
 	public charsetCache: { [key: string]: string };
@@ -65,6 +67,7 @@ export class Armory {
 
 		this.logger.info("Loading config...");
 		this.config = await Config.load(this.logger);
+		this.repositories = createRepositories(this.config.dbType);
 		this.logger.info("Loading data files...");
 		if (this.config.loadDbcs) {
 			await this.dbc.loadAllFiles();

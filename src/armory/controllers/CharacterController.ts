@@ -5,34 +5,13 @@ import { Armory } from "../Armory";
 import { IRealmConfig } from "../Config";
 import { IEmblem, Utils } from "../Utils";
 import { IAchievement as IAchievementDbc } from "../data/DbcReader";
+import { ICharacterData, IEquipmentRow, IArenaTeamRow } from "../repositories";
 
-interface ICharacterData {
-	guid: number;
-	name: string;
-	race: number;
-	class: number;
-	gender: number;
-	level: number;
-	skin: number;
-	face: number;
-	hairStyle: number;
-	hairColor: number;
-	facialStyle: number;
-	playerFlags: number;
-	online: number;
-	guild: string;
-}
-
-interface IEquipmentData {
-	slot: number;
-	itemEntry: number;
-	flags: number;
+interface IEquipmentData extends Omit<IEquipmentRow, "enchantments"> {
 	enchantments: string | number[];
-	randomPropertyId: number;
 	classId: number;
 	subclassId: number;
 	quality: number;
-	transmog?: number;
 	icon?: number;
 	gems?: number[];
 }
@@ -57,18 +36,7 @@ interface IAchievement {
 	icon: string;
 }
 
-interface IArenaTeam {
-	id: number;
-	name: string;
-	type: number;
-	rating: number;
-	seasonWins: number;
-	seasonGames: number;
-	background: number;
-	emblemStyle: number;
-	emblemColor: number;
-	borderStyle: number;
-	borderColor: number;
+interface IArenaTeam extends IArenaTeamRow {
 	emblem?: IEmblem;
 }
 
@@ -341,48 +309,12 @@ export class CharacterController {
 	}
 
 	private async getCharacterData(realm: IRealmConfig, character: string | number): Promise<ICharacterData> {
-		const where = typeof character === "string" ? "LOWER(`characters`.`name`) = LOWER(?)" : "`characters`.`guid` = ?";
-		const [rows] = await this.armory.getCharactersDb(realm.name).query({
-			sql: `
-				SELECT \`characters\`.\`guid\`, \`characters\`.\`name\`, \`race\`, \`class\`, \`gender\`, \`level\`, \`skin\`, \`face\`, \`hairStyle\`, \`hairColor\`, \`facialStyle\`, \`playerFlags\`, \`online\`, \`guild\`.\`name\` AS \`guild\`
-				FROM \`characters\`
-				LEFT JOIN \`guild_member\` ON \`guild_member\`.\`guid\` = \`characters\`.\`guid\`
-				LEFT JOIN \`guild\` ON \`guild\`.\`guildid\` = \`guild_member\`.\`guildid\`
-				LEFT JOIN \`${realm.authDatabase}\`.\`account_access\` ON \`account_access\`.\`id\` = \`characters\`.\`account\` AND \`account_access\`.\`RealmID\` IN (-1, ${realm.realmId}) AND \`account_access\`.\`gmlevel\` > 0
-				WHERE
-					${where}
-					AND (\`account_access\`.\`id\` IS NULL OR ? = 0)
-			`,
-			values: [character, this.armory.config.hideGameMasters ? 1 : 0],
-			timeout: this.armory.config.dbQueryTimeout,
-		});
-
-		if ((rows as RowDataPacket[]).length === 0) {
-			return null;
-		}
-		return rows[0];
+		return this.armory.repositories.character.getCharacterData(this.armory, realm, character);
 	}
 
 	private async getEquipmentData(realm: string, charGuid: number): Promise<IEquipmentData[]> {
-		const transmogSelect = this.armory.config.transmogModule ? ", custom_transmogrification.FakeEntry AS transmog" : "";
-		const transmogJoin = this.armory.config.transmogModule
-			? "LEFT JOIN custom_transmogrification ON custom_transmogrification.GUID = item_instance.guid"
-			: "";
-		let [rows] = await this.armory.getCharactersDb(realm).query({
-			sql: `
-				SELECT
-					character_inventory.slot, item_instance.itemEntry, item_instance.flags, item_instance.enchantments, item_instance.randomPropertyId
-					${transmogSelect}
-				FROM character_inventory
-				JOIN item_instance ON item_instance.guid = character_inventory.item
-				${transmogJoin}
-				WHERE character_inventory.guid = ? AND character_inventory.bag = 0 AND character_inventory.slot IN (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
-			`,
-			values: [charGuid],
-			timeout: this.armory.config.dbQueryTimeout,
-		});
-
-		const data = rows as RowDataPacket[] as IEquipmentData[];
+		const rows = await this.armory.repositories.character.getEquipmentRows(this.armory, realm, charGuid);
+		const data = rows as IEquipmentData[];
 		if (data.length === 0) {
 			return [];
 		}
@@ -393,12 +325,12 @@ export class CharacterController {
 			row.subclassId = item.subclassId;
 		}
 
-		[rows] = await this.armory.worldDb.query({
+		const [itemRows] = await this.armory.worldDb.query({
 			sql: "SELECT entry, quality FROM item_template WHERE entry IN (?)",
 			values: [data.map((row) => row.itemEntry)],
 			timeout: this.armory.config.dbQueryTimeout,
 		});
-		for (const row of rows as RowDataPacket[]) {
+		for (const row of itemRows as RowDataPacket[]) {
 			const item = data.find((item) => item.itemEntry === row.entry);
 			item.quality = row.quality;
 		}
@@ -945,27 +877,7 @@ export class CharacterController {
 	}
 
 	private async getTalents(realm: string, character: number): Promise<number[][]> {
-		const [rows] = await this.armory.getCharactersDb(realm).query({
-			sql: `
-				SELECT spell, specMask
-				FROM character_talent
-				WHERE guid = ?
-			`,
-			values: [character],
-			timeout: this.armory.config.dbQueryTimeout,
-		});
-
-		const talents: number[][] = [[], []];
-		for (const row of rows as RowDataPacket[]) {
-			if (row.specMask === 1 || row.specMask === 3) {
-				talents[0].push(row.spell);
-			}
-			if (row.specMask === 2 || row.specMask === 3) {
-				talents[1].push(row.spell);
-			}
-		}
-
-		return talents;
+		return this.armory.repositories.character.getTalents(this.armory, realm, character);
 	}
 
 	private async getTalentTrees(classId: number) {
@@ -998,29 +910,7 @@ export class CharacterController {
 	}
 
 	private async getGlyphs(realm: string, character: number): Promise<number[][]> {
-		const [rows] = await this.armory.getCharactersDb(realm).query({
-			sql: `
-				SELECT guid, talentGroup, glyph1, glyph2, glyph3, glyph4, glyph5, glyph6
-				FROM character_glyphs
-				WHERE guid = ?
-			`,
-			values: [character],
-			timeout: this.armory.config.dbQueryTimeout,
-		});
-
-		const glyphs: number[][] = [[], []];
-		for (const row of rows as RowDataPacket[]) {
-			const glyphIds = [row.glyph1, row.glyph2, row.glyph3, row.glyph4, row.glyph5, row.glyph6].filter((id) => id !== 0);
-			for (const glyphId of glyphIds) {
-				const glyph = await this.armory.dbc.glyphProperties().find((g) => g.id === glyphId);
-				if (glyph === undefined) {
-					continue;
-				}
-				glyphs[row.talentGroup].push(glyph.spellId);
-			}
-		}
-
-		return glyphs;
+		return this.armory.repositories.character.getGlyphs(this.armory, realm, character);
 	}
 
 	private async getAchievements(
@@ -1084,20 +974,7 @@ export class CharacterController {
 	}
 
 	private async getArenaTeams(realm: string, charGuid: number): Promise<IArenaTeam[]> {
-		const [rows] = await this.armory.getCharactersDb(realm).query({
-			sql: `
-				SELECT
-					arena_team.arenaTeamId AS id, arena_team.name, arena_team.type, arena_team.rating, arena_team.seasonWins, arena_team.seasonGames,
-					arena_team.backgroundColor AS background, arena_team.emblemStyle, arena_team.emblemColor, arena_team.borderStyle, arena_team.borderColor
-				FROM arena_team_member
-				LEFT JOIN arena_team ON arena_team_member.arenaTeamId = arena_team.arenaTeamId
-				WHERE guid = ?
-				ORDER BY arena_team.type ASC
-			`,
-			values: [charGuid],
-			timeout: this.armory.config.dbQueryTimeout,
-		});
-
+		const rows = await this.armory.repositories.character.getArenaTeamsForCharacter(this.armory, realm, charGuid);
 		return (rows as IArenaTeam[]).map((row) => {
 			row.emblem = Utils.makeEmblemObject(row, false);
 			return row;

@@ -1,5 +1,4 @@
 import * as express from "express";
-import { RowDataPacket } from "mysql2";
 
 import { Armory } from "../Armory";
 import { IRealmConfig } from "../Config";
@@ -83,15 +82,12 @@ export class ArenaController {
 
 		const db = this.armory.getCharactersDb(realm.name);
 		const charSet = await this.armory.getDatabaseCharset(realm.name);
+		const arenaRepo = this.armory.repositories.arena;
 
-		const ssp = new DataTablesSsp(req.query, db, "arena_team", "arenaTeamId", [
-			{ name: "name", collation: `${charSet}_general_ci` },
-			{ name: "rating" },
-			{ name: "seasonWins" },
-			{ name: "seasonGames" },
-		]);
+		let ssp = new DataTablesSsp(req.query, db, "arena_team", "arenateamid", arenaRepo.getLadderColumns(charSet));
+		ssp = arenaRepo.configureLadderSsp(ssp, teamSize);
 
-		const result = await ssp.where("`type` = " + teamSize).run(this.armory.config.dbQueryTimeout);
+		const result = await ssp.run(this.armory.config.dbQueryTimeout);
 
 		res.json({
 			...result,
@@ -101,31 +97,14 @@ export class ArenaController {
 	}
 
 	private async getTeamData(realm: IRealmConfig, teamName: string): Promise<ITeamData> {
-		const db = this.armory.getCharactersDb(realm.name);
-		const [rows] = await db.query({
-			sql: `
-				SELECT arenaTeamId, name, captainGuid, type, rating, seasonGames, seasonWins, weekGames, weekWins, emblemStyle, emblemColor, borderStyle, borderColor, backgroundColor AS background
-				FROM arena_team WHERE name = ?
-			`,
-			values: [teamName],
-			timeout: this.armory.config.dbQueryTimeout,
-		});
-		if ((rows as RowDataPacket[]).length === 0) {
+		const arenaRepo = this.armory.repositories.arena;
+		const team = await arenaRepo.getTeamData(this.armory, realm.name, teamName);
+		if (team === null) {
 			return null;
 		}
-		const team = rows[0];
 
-		const [memberRows] = await db.query({
-			sql: `
-				SELECT name, weekGames, weekWins, seasonGames, seasonWins, personalRating, race, class, gender, online
-				FROM arena_team_member
-				LEFT JOIN characters ON arena_team_member.guid = characters.guid
-				WHERE arenaTeamId = ?
-			`,
-			values: [team.arenaTeamId],
-			timeout: this.armory.config.dbQueryTimeout,
-		});
-		const members: ITeamMemberData[] = (memberRows as RowDataPacket[]).map((row) => {
+		const memberRows = await arenaRepo.getTeamMembers(this.armory, realm.name, team.arenaTeamId);
+		const members: ITeamMemberData[] = memberRows.map((row) => {
 			return {
 				name: row.name,
 				weekGames: row.weekGames,

@@ -24,6 +24,7 @@ export interface IIframeModeConfig {
 }
 
 export class Config {
+	public dbType: "azerothcore" | "mangos";
 	public aowowUrl: string;
 	public websiteUrl: string;
 	public websiteName: string;

@@ -1,4 +1,5 @@
 {
+	"dbType": "mangos",
 	"aowowUrl": "https://wowgaming.altervista.org/aowow",
 	"websiteUrl": "https://mywebsite.com",
 	"websiteName": "My Website",
@@ -13,24 +14,24 @@
 	"useZamCdn": false,
 	"realms": [
 		{
-			"name": "AzerothCore",
+			"name": "MaNGOS",
 			"realmId": 1,
-			"authDatabase": "acore_auth",
+			"authDatabase": "realmd",
 			"charactersDatabase": {
 				"host": "localhost",
 				"port": 3306,
-				"user": "acore",
-				"password": "acore",
-				"database": "acore_characters"
+				"user": "root",
+				"password": "mangos",
+				"database": "character2"
 			}
 		}
 	],
 	"worldDatabase": {
 		"host": "localhost",
 		"port": 3306,
-		"user": "acore",
-		"password": "acore",
-		"database": "acore_world"
+		"user": "root",
+		"password": "mangos",
+		"database": "mangos2"
 	},
 	"dbQueryTimeout": 10000
 }
