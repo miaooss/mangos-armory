@@ -118,6 +118,9 @@ I also noticed that such a tool was frequently requested in the AzerothCore Disc
 	```
 3. Configure the application: copy `config.default.json` to `config.json` or `.env.example` to `.env` and edit the resulting file.  
 	See the [Configuration Reference](#configuration-reference) below for a description of all values.
+	- Running against a [MaNGOS](https://github.com/mangostwo/database) database instead of AzerothCore? Start from
+	  `config.mangos.default.json` / `.env.mangos.example` instead — same options, but with `dbType` set to `"mangos"`
+	  and the realm/world database defaults filled in for MaNGOS's schema and database names.
 4. Download the model viewer's data from the [Releases](https://github.com/r-o-b-o-t-o/azerothcore-armory/releases) page and extract it to the `data/` directory.
 
 ### Configuration Reference
@@ -127,6 +130,7 @@ I also noticed that such a tool was frequently requested in the AzerothCore Disc
 
 | config.json                    | .env                                               | Type                          | Default value                              | Description                                                                                                                                                                                            |
 |--------------------------------|----------------------------------------------------|-------------------------------|--------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `dbType`                       | `ACORE_ARMORY_DB_TYPE`                             | `"azerothcore"` \| `"mangos"` | `"azerothcore"`                            | Which core's database schema to query against. Use `"mangos"` for a [MaNGOS](https://github.com/mangostwo/database)-based server                                                                       |
 | `aowowUrl`                     | `ACORE_ARMORY_AOWOW_URL`                           | String                        | `"https://wowgaming.altervista.org/aowow"` | The URL of the AoWoW database to use for tooltips and links                                                                                                                                            |
 | `websiteUrl`                   | `ACORE_ARMORY_WEBSITE_URL`                         | String                        | `"https://mywebsite.com"`                  | Your website's URL. Used to redirect to the homepage on error pages                                                                                                                                    |
 | `websiteName`                  | `ACORE_ARMORY_WEBSITE_NAME`                        | String                        | `"My Website"`                             | Your website's name. Displayed in the redirect button on error pages                                                                                                                                   |
