@@ -2,6 +2,7 @@ import type { Armory } from "../../Armory";
 import type { IRealmConfig } from "../../Config";
 import type { IAccountRepository } from "../types";
 import { computeHash, hashesEqual } from "../../crypto/MangosPassword";
+import { computeVerifier, generateSalt } from "../../crypto/Srp6";
 
 /**
  * MaNGOS has no `account_access` table: `gmlevel` lives directly on `account`
@@ -47,9 +48,11 @@ export class MangosAccountRepository implements IAccountRepository {
 		}
 
 		const hash = computeHash(row.username, newPassword);
+		const salt = generateSalt();
+		const verifier = computeVerifier(row.username, newPassword, salt);
 		await db.query({
-			sql: `UPDATE \`${realm.authDatabase}\`.\`account\` SET \`sha_pass_hash\` = ? WHERE \`id\` = ?`,
-			values: [hash, accountId],
+			sql: `UPDATE \`${realm.authDatabase}\`.\`account\` SET \`sha_pass_hash\` = ?, \`s\` = ?, \`v\` = ?, \`sessionkey\` = NULL WHERE \`id\` = ?`,
+			values: [hash, salt.toString("hex").toUpperCase(), verifier.toString("hex").toUpperCase(), accountId],
 			timeout: armory.config.dbQueryTimeout,
 		});
 	}
