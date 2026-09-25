@@ -3,10 +3,16 @@ set -e
 
 DATA_DIR="/data"
 SENTINEL="$DATA_DIR/Achievement_3.3.5_12340.csv"
-RELEASE_URL="https://github.com/r-o-b-o-t-o/azerothcore-armory/releases/download/v1.0.0/data.tar.gz"
-GITHUB_API="https://api.github.com/repos/r-o-b-o-t-o/azerothcore-armory/contents/data"
-RAW_BASE="https://raw.githubusercontent.com/r-o-b-o-t-o/azerothcore-armory/master/data"
 TEMP_DIR="$DATA_DIR/.tmp-download"
+
+RELEASE_URL="${INIT_DATA_RELEASE_URL}"
+GITHUB_API="${INIT_DATA_GITHUB_API}"
+RAW_BASE="${INIT_DATA_RAW_BASE}"
+
+if [ -z "$RELEASE_URL" ] || [ -z "$GITHUB_API" ] || [ -z "$RAW_BASE" ]; then
+    echo "[init-data] ERROR: INIT_DATA_RELEASE_URL, INIT_DATA_GITHUB_API and INIT_DATA_RAW_BASE must be set."
+    exit 1
+fi
 
 apk add --no-cache curl jq > /dev/null 2>&1
 
