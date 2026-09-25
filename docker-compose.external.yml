@@ -1,0 +1,30 @@
+services:
+    init-data:
+        image: alpine:3
+        volumes:
+            - ./data:/data/
+            - ./scripts/init-data.sh:/init-data.sh:ro
+        command: sh /init-data.sh
+
+    armory:
+        restart: unless-stopped
+        image: ghcr.io/miaooss/mangos-armory:latest 
+        volumes:
+            - ./data:/data/
+            - ./logs:/logs/
+        env_file:
+            - .env
+        networks:
+            - local-private-net
+        ports:
+            - 48733:48733
+        depends_on:
+            init-data:
+                condition: service_completed_successfully
+
+networks:
+    local-private-net:
+        driver: bridge
+    ac-network:
+        name: ${DOCKER_AC_NETWORK_NAME:-azerothcore-wotlk_ac-network} # default network name if you use the docker setup of ac
+        external: ${DOCKER_AC_NETWORK_EXTERNAL:-false}
