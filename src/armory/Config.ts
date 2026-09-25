@@ -34,6 +34,8 @@ export class Config {
 	public hideGameMasters: boolean;
 	public transmogModule: boolean;
 	public useZamCdn: boolean;
+	public enablePasswordChange: boolean;
+	public enableDownloads: boolean;
 	public realms: IRealmConfig[];
 	public worldDatabase: IDatabaseConfig;
 	public dbQueryTimeout: number;

@@ -12,6 +12,8 @@
 	"hideGameMasters": true,
 	"transmogModule": false,
 	"useZamCdn": false,
+	"enablePasswordChange": true,
+	"enableDownloads": true,
 	"realms": [
 		{
 			"name": "MaNGOS",

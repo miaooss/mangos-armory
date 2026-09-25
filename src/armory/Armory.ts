@@ -172,12 +172,16 @@ export class Armory {
 		app.get("/arena/ladder", this.wrapRoute(arenaController.ladder.bind(arenaController)));
 		app.get("/arena/team/:realm/:name", this.wrapRoute(arenaController.team.bind(arenaController)));
 
-		const authController = new AuthController(this);
-		app.get("/account/password", this.wrapRoute(authController.changePasswordForm.bind(authController)));
-		app.post("/account/password", this.wrapRoute(authController.changePassword.bind(authController)));
+		if (this.config.enablePasswordChange) {
+			const authController = new AuthController(this);
+			app.get("/account/password", this.wrapRoute(authController.changePasswordForm.bind(authController)));
+			app.post("/account/password", this.wrapRoute(authController.changePassword.bind(authController)));
+		}
 
-		const downloadsController = new DownloadsController();
-		app.get("/downloads", this.wrapRoute(downloadsController.index.bind(downloadsController)));
+		if (this.config.enableDownloads) {
+			const downloadsController = new DownloadsController();
+			app.get("/downloads", this.wrapRoute(downloadsController.index.bind(downloadsController)));
+		}
 
 		app.use((err, req: express.Request, res: express.Response, next: express.NextFunction) => {
 			// Error handler
