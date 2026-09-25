@@ -44,6 +44,9 @@ curl -L --retry 5 --retry-delay 10 --retry-connrefused \
     -o "$TEMP_DIR/data.tar.gz" \
     "$RELEASE_URL"
 
+echo "[init-data] Tarball top-level structure:"
+tar -tzf "$TEMP_DIR/data.tar.gz" | awk -F/ '{print $1}' | sort -u
+
 echo "[init-data] Extracting..."
 tar -xzf "$TEMP_DIR/data.tar.gz" -C "$DATA_DIR"
 
