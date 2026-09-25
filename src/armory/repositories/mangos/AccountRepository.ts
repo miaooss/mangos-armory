@@ -50,9 +50,13 @@ export class MangosAccountRepository implements IAccountRepository {
 		const hash = computeHash(row.username, newPassword);
 		const salt = generateSalt();
 		const verifier = computeVerifier(row.username, newPassword, salt);
+		// MaNGOS Two reads v/s via OpenSSL BN_hex2bn (big-endian); Srp6.ts produces
+		// little-endian buffers, so reverse before storing.
+		const sHex = Buffer.from(salt).reverse().toString("hex").toUpperCase();
+		const vHex = Buffer.from(verifier).reverse().toString("hex").toUpperCase();
 		await db.query({
 			sql: `UPDATE \`${realm.authDatabase}\`.\`account\` SET \`sha_pass_hash\` = ?, \`s\` = ?, \`v\` = ?, \`sessionkey\` = NULL WHERE \`id\` = ?`,
-			values: [hash, salt.toString("hex").toUpperCase(), verifier.toString("hex").toUpperCase(), accountId],
+			values: [hash, sHex, vHex, accountId],
 			timeout: armory.config.dbQueryTimeout,
 		});
 	}
