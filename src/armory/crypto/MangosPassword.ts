@@ -10,8 +10,8 @@ export function computeHash(username: string, password: string): string {
 }
 
 export function hashesEqual(a: string, b: string): boolean {
-	const bufA = Buffer.from(a, "utf8");
-	const bufB = Buffer.from(b, "utf8");
+	const bufA = Buffer.from(a.toUpperCase(), "utf8");
+	const bufB = Buffer.from(b.toUpperCase(), "utf8");
 	if (bufA.length !== bufB.length) {
 		return false;
 	}
