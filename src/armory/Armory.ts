@@ -15,6 +15,8 @@ import { IndexController } from "./controllers/IndexController";
 import { CharacterController } from "./controllers/CharacterController";
 import { GuildController } from "./controllers/GuildController";
 import { ArenaController } from "./controllers/ArenaController";
+import { AuthController } from "./controllers/AuthController";
+import { DownloadsController } from "./controllers/DownloadsController";
 
 export class Armory {
 	public characterCustomization: CharacterCustomization;
@@ -136,6 +138,9 @@ export class Armory {
 			}),
 		);
 
+		app.use(express.json());
+		app.use(express.urlencoded({ extended: true }));
+
 		app.use("/js", express.static("static/js"));
 		app.use("/css", express.static("static/css"));
 		app.use("/img", express.static("static/img"));
@@ -144,6 +149,7 @@ export class Armory {
 		app.use("/data/bone", express.static("data/bone"));
 		app.use("/data/textures", express.static("data/textures"));
 		app.use("/data/background.png", express.static("data/modelviewer-background.png"));
+		app.use("/downloads/files", express.static("downloads"));
 
 		const indexController = new IndexController(this);
 		app.get("/", this.wrapRoute(indexController.index.bind(indexController)));
@@ -165,6 +171,13 @@ export class Armory {
 		app.get("/arena", this.wrapRoute(arenaController.index.bind(arenaController)));
 		app.get("/arena/ladder", this.wrapRoute(arenaController.ladder.bind(arenaController)));
 		app.get("/arena/team/:realm/:name", this.wrapRoute(arenaController.team.bind(arenaController)));
+
+		const authController = new AuthController(this);
+		app.get("/account/password", this.wrapRoute(authController.changePasswordForm.bind(authController)));
+		app.post("/account/password", this.wrapRoute(authController.changePassword.bind(authController)));
+
+		const downloadsController = new DownloadsController();
+		app.get("/downloads", this.wrapRoute(downloadsController.index.bind(downloadsController)));
 
 		app.use((err, req: express.Request, res: express.Response, next: express.NextFunction) => {
 			// Error handler

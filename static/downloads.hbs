@@ -1,0 +1,28 @@
+<div class="container">
+	<h1 class="title is-size-2">Downloads</h1>
+
+	{{#if (equalsLength files 0)}}
+	<p>No files are currently available for download.</p>
+	{{else}}
+	<table class="table is-striped is-fullwidth">
+		<thead>
+			<tr>
+				<th>File</th>
+				<th>Size</th>
+				<th>Last Updated</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each files}}
+			<tr>
+				<td>{{name}}</td>
+				<td>{{size}}</td>
+				<td>{{modifiedAt}}</td>
+				<td><a class="button is-small is-info" href="{{../websiteRoot}}/downloads/files/{{name}}">Download</a></td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+</div>

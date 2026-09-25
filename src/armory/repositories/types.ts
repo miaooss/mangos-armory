@@ -82,6 +82,11 @@ export interface IAccountRepository {
 	readonly gmTableName: string;
 	/** Extra `AND ...` condition appended to `LEFT JOIN <gmTableName> ON <gmTableName>.id = characters.account`. */
 	gmJoinExtraCondition(realm: IRealmConfig): string;
+
+	/** Returns the account id if `password` matches the stored credential for `accountName`, otherwise null. */
+	verifyPassword(armory: Armory, realm: IRealmConfig, accountName: string, password: string): Promise<number | null>;
+	/** Overwrites the stored credential for `accountId` with `newPassword`. */
+	updatePassword(armory: Armory, realm: IRealmConfig, accountId: number, newPassword: string): Promise<void>;
 }
 
 export interface ICharacterRepository {

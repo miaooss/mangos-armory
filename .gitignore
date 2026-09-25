@@ -9,6 +9,10 @@ data/*
 !data/*.csv
 !data/*.png
 
+# Manually uploaded downloadable files
+downloads/*
+!downloads/.gitkeep
+
 # Configuration
 config.json
 .env

@@ -7,6 +7,7 @@ services:
         volumes:
             - ./data:/data/
             - ./logs:/logs/
+            - ./downloads:/downloads/
         env_file:
             - .env
         networks:
