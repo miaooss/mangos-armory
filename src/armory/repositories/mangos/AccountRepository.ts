@@ -25,10 +25,12 @@ export class MangosAccountRepository implements IAccountRepository {
 		});
 		const row = (rows as { id: number; username: string; sha_pass_hash: string }[])[0];
 		if (row === undefined) {
+			console.log(`[verifyPassword] account not found: ${accountName}`);
 			return null;
 		}
 
 		const computed = computeHash(row.username, password);
+		console.log(`[verifyPassword] computed=${computed} stored=${row.sha_pass_hash} match=${hashesEqual(computed, row.sha_pass_hash)}`);
 		if (!hashesEqual(computed, row.sha_pass_hash)) {
 			return null;
 		}
