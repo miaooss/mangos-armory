@@ -45,8 +45,7 @@ curl -L --retry 5 --retry-delay 10 --retry-connrefused \
     "$RELEASE_URL"
 
 echo "[init-data] Extracting..."
-tar -xzf "$TEMP_DIR/data.tar.gz" -C "$DATA_DIR" --strip-components=1 \
-    || tar -xzf "$TEMP_DIR/data.tar.gz" -C "$DATA_DIR"
+tar -xzf "$TEMP_DIR/data.tar.gz" -C "$DATA_DIR"
 
 rm -rf "$TEMP_DIR"
 

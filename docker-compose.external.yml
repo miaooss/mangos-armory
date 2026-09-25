@@ -4,6 +4,10 @@ services:
         volumes:
             - ./data:/data/
             - ./scripts/init-data.sh:/init-data.sh:ro
+        environment:
+            INIT_DATA_RELEASE_URL: https://github.com/r-o-b-o-t-o/azerothcore-armory/releases/download/v1.0.0/data.tar.gz
+            INIT_DATA_GITHUB_API: https://api.github.com/repos/r-o-b-o-t-o/azerothcore-armory/contents/data
+            INIT_DATA_RAW_BASE: https://raw.githubusercontent.com/r-o-b-o-t-o/azerothcore-armory/master/data
         command: sh /init-data.sh
 
     armory:
