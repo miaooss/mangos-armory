@@ -39,6 +39,7 @@ export class Config {
 	public realms: IRealmConfig[];
 	public worldDatabase: IDatabaseConfig;
 	public dbQueryTimeout: number;
+	public listenPort: number;
 
 	private static envPrefix = "ACORE_ARMORY";
 	private static checkedMissingField = false;

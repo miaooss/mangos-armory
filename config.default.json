@@ -35,5 +35,6 @@
 		"password": "acore",
 		"database": "acore_world"
 	},
-	"dbQueryTimeout": 10000
+	"dbQueryTimeout": 10000,
+	"listenPort": 48733
 }

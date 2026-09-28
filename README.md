@@ -149,6 +149,7 @@ I also noticed that such a tool was frequently requested in the AzerothCore Disc
 | `realms[0].charactersDatabase` | `ACORE_ARMORY_REALMS__0__CHARACTERS_DATABASE__`... | Database configuration object |                                            | Configuration for the characters database. See "Database   configuration" below                                                                                                                        |
 | `worldDatabase`                | `ACORE_ARMORY_WORLD_DATABASE__`...                 | Database configuration object |                                            | Configuration for the world database. This is shared between all realms   at the moment. See "Database configuration" below                                                                            |
 | `dbQueryTimeout`               | `ACORE_ARMORY_DB_QUERY_TIMEOUT`                    | Number                        | `10000`                                    | The maximum duration in milliseconds of a database query before it times   out                                                                                                                         |
+| `listenPort`                   | `ACORE_ARMORY_LISTEN_PORT`                         | Number                        | `48733`                                    | The port the Armory's web server listens on                                                                                                                                                            |
 </details>
 
 <details>

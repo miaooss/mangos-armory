@@ -22,7 +22,7 @@ services:
         networks:
             - local-private-net
         ports:
-            - 48733:48733
+            - ${ACORE_ARMORY_LISTEN_PORT:-48733}:${ACORE_ARMORY_LISTEN_PORT:-48733}
         depends_on:
             init-data:
                 condition: service_completed_successfully

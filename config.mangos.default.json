@@ -35,5 +35,6 @@
 		"password": "mangos",
 		"database": "mangos2"
 	},
-	"dbQueryTimeout": 10000
+	"dbQueryTimeout": 10000,
+	"listenPort": 48733
 }

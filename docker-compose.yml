@@ -13,7 +13,7 @@ services:
         networks:
             - local-private-net
         ports:
-            - 48733:48733
+            - ${ACORE_ARMORY_LISTEN_PORT:-48733}:${ACORE_ARMORY_LISTEN_PORT:-48733}
 
 networks:
     local-private-net:

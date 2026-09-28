@@ -65,10 +65,10 @@ export class Armory {
 
 	public async start(): Promise<void> {
 		const app: Express = express();
-		const listenPort = 48733;
 
 		this.logger.info("Loading config...");
 		this.config = await Config.load(this.logger);
+		const listenPort = this.config.listenPort;
 		this.repositories = createRepositories(this.config.dbType);
 		this.logger.info("Loading data files...");
 		if (this.config.loadDbcs) {
